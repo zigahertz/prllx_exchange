@@ -1,4 +1,7 @@
 import Config
+import Dotenvy
+
+source(["#{config_env()}.local.env", System.get_env()])
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
@@ -19,6 +22,8 @@ import Config
 if System.get_env("PHX_SERVER") do
   config :parallax, ParallaxWeb.Endpoint, server: true
 end
+
+config :parallax, :parallax_api_key, env!("API_KEY", :string)
 
 if config_env() == :prod do
   database_url =
