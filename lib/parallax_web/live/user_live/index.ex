@@ -1,9 +1,8 @@
 defmodule ParallaxWeb.UserLive.Index do
   use ParallaxWeb, :live_view
 
-  alias Parallax.Accounts
-  alias ParallaxWeb.UserJSON, as: J
-  # alias Parallax.Accounts.User
+  alias Parallax.Api
+  alias Parallax.Accounts.User
 
   @impl true
   def mount(_params, _session, socket) do
@@ -26,17 +25,9 @@ defmodule ParallaxWeb.UserLive.Index do
     {:noreply, stream_insert(socket, :users, user)}
   end
 
-  defp users, do: Enum.map(Accounts.list_users(), &J.data/1)
-end
+  defp users, do: Enum.map(Api.get_users, &data/1)
 
-defmodule ParallaxWeb.UserJSON do
-  alias Parallax.Accounts.User
-
-  # def show(%{user: user}) do
-  #   %{data: data(user)}
-  # end
-
-  def data(%{"email" => email, "id" => id, "name" => name}) do
+  defp data(%{email: email, id: id, name: name}) do
     %User{
       id: id,
       name: name,
