@@ -1,8 +1,6 @@
 defmodule ParallaxWeb.UserLive.Index do
   use ParallaxWeb, :live_view
-
-  alias Parallax.Api
-  alias Parallax.Accounts.User
+  alias Parallax.CacheServer
 
   @impl true
   def mount(_params, _session, socket) do
@@ -17,21 +15,8 @@ defmodule ParallaxWeb.UserLive.Index do
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "Active Users")
-    |> assign(:user, nil)
+    |> assign(:user_id, nil)
   end
 
-  @impl true
-  def handle_info({ParallaxWeb.UserLive.FormComponent, {:saved, user}}, socket) do
-    {:noreply, stream_insert(socket, :users, user)}
-  end
-
-  defp users, do: Enum.map(Api.get_users, &data/1)
-
-  defp data(%{email: email, id: id, name: name}) do
-    %User{
-      id: id,
-      name: name,
-      email: email
-    }
-  end
+  defp users, do: CacheServer.read(:users)
 end

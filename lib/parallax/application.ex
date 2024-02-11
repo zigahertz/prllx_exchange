@@ -14,6 +14,11 @@ defmodule Parallax.Application do
       {Phoenix.PubSub, name: Parallax.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Parallax.Finch},
+      Parallax.CacheServer,
+      Parallax.ExchangeServer,
+      {DynamicSupervisor, name: Parallax.QuoteServer},
+
+      # {Parallax.ExchangeSupervisor, name: Parallax.ExchangeSupervisor},
       # Start a worker by calling: Parallax.Worker.start_link(arg)
       # {Parallax.Worker, arg},
       # Start to serve requests, typically the last entry

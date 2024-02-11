@@ -1,4 +1,4 @@
-defmodule Parallax.Api do
+defmodule Parallax.API do
   use Tesla
   require Logger
 
@@ -6,6 +6,7 @@ defmodule Parallax.Api do
   # in production, this would be modified to dynamically load an API key (from a users DB table, for example)
   plug Tesla.Middleware.Headers, [{"X-Api-Key", Application.get_env(:parallax, :parallax_api_key)}]
   plug Tesla.Middleware.JSON, engine_opts: [keys: :atoms]
+  # plug Tesla.Middleware.Logger
 
   @doc """
   list user fixtures
@@ -42,10 +43,12 @@ defmodule Parallax.Api do
   @doc """
   list all quotes
   GET /api/quotes
+
   """
-  def get_quotes do
+  def get_quotes() do
     get("quotes") |> handle_response
   end
+
   @doc """
   create an order tied to a quote for a given from_amount
   POST /api/orders

@@ -60,7 +60,7 @@ defmodule Parallax.MixProject do
       {:bandit, "~> 1.2"},
       {:tesla, "~> 1.8"},
       {:dotenvy, "~> 0.8"},
-      {:oban, "~> 2.17"}
+      {:timex, "~> 3.0"}
     ]
   end
 
