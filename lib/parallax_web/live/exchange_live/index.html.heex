@@ -1,12 +1,17 @@
 <.header>
   Exchange
   <:actions>
+
     <.button phx-click="create_quote">
       Generate Quote
     </.button>
 
     <.link patch={~p"/u/#{@user_id}/orders"}>
       <.button>Orders</.button>
+    </.link>
+
+    <.link patch={~p"/"}>
+      <.button>Users</.button>
     </.link>
   </:actions>
 </.header>
@@ -15,7 +20,6 @@
   id="quotes"
   rows={@streams.quotes}
 >
-  if
   <:col :let={{_id, quotes}} label="Expires in">
     <%= if quotes.status == :active do %>
       <%= relative_time(quotes.created_at) %>

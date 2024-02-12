@@ -1,5 +1,6 @@
 defmodule ParallaxWeb.ExchangeLive.FormComponent do
   use ParallaxWeb, :live_component
+  alias Parallax.Exchange
 
   @impl true
   def render(assigns) do
@@ -7,7 +8,6 @@ defmodule ParallaxWeb.ExchangeLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-
       </.header>
 
       <.simple_form
@@ -60,14 +60,15 @@ defmodule ParallaxWeb.ExchangeLive.FormComponent do
 
   @impl true
   def handle_event("execute", %{"from_amount" => from_amount}, socket) do
-    # require IEx; IEx.pry
-    {:noreply, socket}
-    # save_quotes(socket, socket.assigns.action, quotes_params)
+    case Exchange.create_order(socket.assigns.user_id, socket.assigns.id, from_amount) do
+      %Parallax.Exchange.Order{} ->
+        {:noreply, push_patch(socket, to: socket.assigns.patch)}
+      _ -> {:noreply, socket}
+    end
   end
 
   defp assign_form(socket) do
-    assign(socket, :form, to_form(%{"from_amount" => 0}))
+    assign(socket, :form, to_form(%{"from_amount" => 100}))
   end
 
-  defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 end

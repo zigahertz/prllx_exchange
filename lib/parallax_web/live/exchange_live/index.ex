@@ -21,7 +21,7 @@ defmodule ParallaxWeb.ExchangeLive.Index do
   end
 
   defp apply_action(socket, :order, %{"id" => user_id, "quote_id" => quote_id}) do
-    [{_, attrs}] = Registry.lookup(QuoteRegistry, quote_id)
+    [{_, attrs}] = Registry.lookup(ParallaxRegistry, quote_id)
 
     assign(socket, [page_title: "Make Order", user_id: user_id, quote_attrs: attrs, exp: relative_time(attrs.created_at)])
   end

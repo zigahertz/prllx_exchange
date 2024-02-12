@@ -22,8 +22,7 @@ defmodule ParallaxWeb.Router do
     live "/u/:id/exchange", ExchangeLive.Index, :index
     live "/u/:id/exchange/:quote_id", ExchangeLive.Index, :order
 
-    live "/u/:id/orders", OrdersLive.Show, :show
-    live "/u/:id/orders/:order_id", OrdersLive.Show, :index
+    live "/u/:id/orders", OrdersLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
