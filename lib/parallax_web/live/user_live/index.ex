@@ -1,6 +1,5 @@
 defmodule ParallaxWeb.UserLive.Index do
   use ParallaxWeb, :live_view
-  alias Parallax.CacheServer
 
   @impl true
   def mount(_params, _session, socket) do
@@ -8,15 +7,9 @@ defmodule ParallaxWeb.UserLive.Index do
   end
 
   @impl true
-  def handle_params(params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  def handle_params(_params, _url, socket) do
+    {:noreply, assign(socket, :page_title, "Active Users")}
   end
 
-  defp apply_action(socket, :index, _params) do
-    socket
-    |> assign(:page_title, "Active Users")
-    |> assign(:user_id, nil)
-  end
-
-  defp users, do: CacheServer.read(:users)
+  defp users, do: Parallax.Exchange.list_users()
 end

@@ -1,7 +1,8 @@
 defmodule Parallax.CacheServer do
   use GenServer
+  require Logger
 
-  defstruct ~w(users quotes orders)a
+  defstruct ~w(users orders)a
 
   ## Client API
   def start_link(_) do
@@ -17,12 +18,10 @@ defmodule Parallax.CacheServer do
   end
 
   ## Server API
-
   @impl true
   def init(_opts) do
-    {:ok, struct!(__MODULE__, [users: %{}, quotes: %{}, orders: %{}])}
+    {:ok, struct!(__MODULE__, users: [], orders: [])}
   end
-
 
   @impl true
   def handle_call({:read, [schema, id]}, _, state) do
@@ -39,8 +38,10 @@ defmodule Parallax.CacheServer do
     {:noreply, struct!(state, data)}
   end
 
-  # @impl true
-  # def handle_cast({:clear}, _state) do
-  #   {:noreply, %{}}
-  # end
+  @impl true
+  def handle_info(msg, state) do
+    Logger.warning(msg)
+    {:noreply, state}
+  end
+
 end

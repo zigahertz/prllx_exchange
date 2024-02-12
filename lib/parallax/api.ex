@@ -3,8 +3,12 @@ defmodule Parallax.API do
   require Logger
 
   plug Tesla.Middleware.BaseUrl, "https://plx-hiring-api.fly.dev/api/"
+
   # in production, this would be modified to dynamically load an API key (from a users DB table, for example)
-  plug Tesla.Middleware.Headers, [{"X-Api-Key", Application.get_env(:parallax, :parallax_api_key)}]
+  plug Tesla.Middleware.Headers, [
+    {"X-Api-Key", Application.get_env(:parallax, :parallax_api_key)}
+  ]
+
   plug Tesla.Middleware.JSON, engine_opts: [keys: :atoms]
   # plug Tesla.Middleware.Logger
 
@@ -63,6 +67,6 @@ defmodule Parallax.API do
   end
 
   def handle_response({:ok, %Tesla.Env{status: status}}) do
-    Logger.error([status: status, message: "API error"])
+    Logger.error(status: status, message: "API error")
   end
 end

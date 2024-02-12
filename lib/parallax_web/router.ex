@@ -17,28 +17,13 @@ defmodule ParallaxWeb.Router do
   scope "/", ParallaxWeb do
     pipe_through :browser
 
-    # get "/", PageController, :home
-
-    # 1
     live "/", UserLive.Index, :index
 
-    # 2
-    # live "/u/:id/quote", OrdersLive.Index, :quote
-    # live "/u/:id/exhange", OrdersLive.Index, :execute
-    live "/u/:id/exchange", ExchangeLive.Index, :execute
+    live "/u/:id/exchange", ExchangeLive.Index, :index
+    live "/u/:id/exchange/:quote_id", ExchangeLive.Index, :order
 
-    # 3
     live "/u/:id/orders", OrdersLive.Show, :show
     live "/u/:id/orders/:order_id", OrdersLive.Show, :index
-
-    # live "/orders/:id", OrdersLive.Show, :show
-    # live "/orders/user/:id"
-
-    # live "/users/new", UserLive.Index, :new
-    # live "/users/:id/edit", UserLive.Index, :edit
-
-    # live "/users/:id", UserLive.Show, :show
-    # live "/users/:id/show/edit", UserLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
