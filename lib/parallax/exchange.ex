@@ -41,7 +41,7 @@ defmodule Parallax.Exchange do
   end
 
   def create_quote do
-    API.create_quote |> start_quote |> IO.inspect(label: :pipe)
+    API.create_quote |> start_quote
   end
 
   def start_quote(attrs) do
@@ -52,7 +52,7 @@ defmodule Parallax.Exchange do
   ensures that quotes are unique i.e. quote data corresponding to an already-existing GenServer
   received on subsequent API calls are ignored
   """
-  def lookup_or_create_quote_pid(attrs) do
+  def lookup_or_create_quote_pid(attrs) when is_map(attrs) do
     with [] <- Registry.lookup(QuoteRegistry, attrs.id),
         {:ok, pid} <- DynamicSupervisor.start_child(QuoteSupervisor, {Quote, via_tuple(attrs)}) do
       pid

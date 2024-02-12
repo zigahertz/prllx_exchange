@@ -4,17 +4,26 @@ defmodule ParallaxWeb.ExchangeLive.Index do
 
   @impl true
   def mount(_, _session, socket) do
-    if connected?(socket), do: :timer.send_interval(1000, self(), :tick)
+    if connected?(socket), do: :timer.send_interval(:timer.seconds(1), self(), :tick)
 
     {:ok, stream(socket, :quotes, quotes())}
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _url, socket) do
-    {
-      :noreply,
-      assign(socket, page_title: "Currency Exchange", user_id: id)
-    }
+  def handle_params(params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  defp apply_action(socket, :index, %{"id" => id}) do
+    socket
+    |> assign(:page_title, "Quotes")
+    |> assign(:user_id, id)
+  end
+
+  defp apply_action(socket, :order, %{"id" => user_id, "quote_id" => quote_id}) do
+    [{_, attrs}] = Registry.lookup(QuoteRegistry, quote_id)
+
+    assign(socket, [page_title: "Make Order", user_id: user_id, quote_attrs: attrs, exp: relative_time(attrs.created_at)])
   end
 
   @impl true
@@ -31,12 +40,19 @@ defmodule ParallaxWeb.ExchangeLive.Index do
 
   def relative_time(dt) do
     time = Timex.parse!(dt, "{ISO:Extended}")
-    expires_in = 5 * 60 - Timex.diff(Timex.now(), time, :second)
+    exp = 5 * 60 - Timex.diff(Timex.now(), time, :second)
 
-    cond do
-      expires_in < 60 -> "#{expires_in} seconds"
-      60 <= expires_in && expires_in <= 120 -> "#{div(expires_in, 60)} minute"
-      true -> "#{div(expires_in, 60)} minutes"
-    end
+    min_sec(exp)
+  end
+
+  def min_sec(sec) do
+    min = div(sec, 60)
+
+    {m, s} =
+      cond do
+        min == 0 -> {0, sec}
+        true -> {min, sec - min * 60}
+      end
+    "#{m}m #{s}s"
   end
 end

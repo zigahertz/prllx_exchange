@@ -22,32 +22,35 @@
     <% else %>
       Expired
     <% end %>
-
   </:col>
   <:col :let={{_id, quotes}} label="From"><%= String.upcase(quotes.from_currency) %></:col>
   <:col :let={{_id, quotes}} label="To"><%= String.upcase(quotes.to_currency) %></:col>
   <:col :let={{_id, quotes}} label="Rate"><%= quotes.rate %></:col>
   <:action :let={{_id, quotes}}>
-    <.link patch={~p"/u/#{@user_id}/exchange/#{quotes}"}>
-      <.button>
-        Execute
-      </.button>
-    </.link>
+    <%= if quotes.status == :active do %>
+      <.link patch={~p"/u/#{@user_id}/exchange/#{quotes}"}>
+        <.button>
+          Create Order
+        </.button>
+      </.link>
+    <% end %>
   </:action>
 </.table>
 
 <.modal
-  :if={@live_action in [:execute]}
+  :if={@live_action in [:order]}
   id="quotes-modal"
   show
   on_cancel={JS.patch(~p"/u/#{@user_id}/exchange")}
 >
   <.live_component
     module={ParallaxWeb.ExchangeLive.FormComponent}
-    id={@quotes.id}
+    id={@quote_attrs.id}
+    user_id={@user_id}
     title={@page_title}
+    quote_attrs={@quote_attrs}
+    expiration={@exp}
     action={@live_action}
-    quotes={@quotes}
     patch={~p"/u/#{@user_id}/exchange"}
   />
 </.modal>
