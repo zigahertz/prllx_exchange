@@ -3,12 +3,6 @@ defmodule ParallaxWeb.OrdersLive.Index do
   alias Parallax.Exchange
 
   @impl true
-  def mount(_, _session, socket) do
-
-    {:ok, socket}
-  end
-
-  @impl true
   def handle_params(%{"id" => id}, _url, socket) do
     {
       :noreply,
@@ -19,5 +13,4 @@ defmodule ParallaxWeb.OrdersLive.Index do
   end
 
   defp orders(id), do: Exchange.fetch_orders(id)
-
 end

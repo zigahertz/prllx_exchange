@@ -21,9 +21,9 @@ defmodule ParallaxWeb.ExchangeLive.Index do
   end
 
   defp apply_action(socket, :order, %{"id" => user_id, "quote_id" => quote_id}) do
-    [{_, attrs}] = Registry.lookup(ParallaxRegistry, quote_id)
+    {_, attrs} = Exchange.lookup_quote(quote_id)
 
-    assign(socket, [page_title: "Make Order", user_id: user_id, quote_attrs: attrs, exp: relative_time(attrs.created_at)])
+    assign(socket, [page_title: "Exchange Currency", user_id: user_id, quote_attrs: attrs, exp: relative_time(attrs.created_at)])
   end
 
   @impl true
@@ -33,7 +33,10 @@ defmodule ParallaxWeb.ExchangeLive.Index do
 
   @impl true
   def handle_event("create_quote", _, socket) do
-    {:noreply, stream_insert(socket, :quotes, Exchange.create_quote(), at: 0)}
+    case Exchange.create_quote() do
+      %Exchange.Quote{} = q ->
+        {:noreply, stream_insert(socket, :quotes, q, at: 0)}
+    end
   end
 
   defp quotes, do: Exchange.fetch_quotes()

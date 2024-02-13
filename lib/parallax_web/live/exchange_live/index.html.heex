@@ -1,10 +1,13 @@
 <.header>
-  Exchange
+  Quotes
   <:actions>
 
-    <.button phx-click="create_quote">
+    <.button phx-click={JS.push("create_quote", loading: "#quotes")}>
       Generate Quote
     </.button>
+    <%!-- <.button phx-click="create_quote">
+      Generate Quote
+    </.button> --%>
 
     <.link patch={~p"/u/#{@user_id}/orders"}>
       <.button>Orders</.button>
@@ -20,16 +23,6 @@
   id="quotes"
   rows={@streams.quotes}
 >
-  <:col :let={{_id, quotes}} label="Expires in">
-    <%= if quotes.status == :active do %>
-      <%= relative_time(quotes.created_at) %>
-    <% else %>
-      Expired
-    <% end %>
-  </:col>
-  <:col :let={{_id, quotes}} label="From"><%= String.upcase(quotes.from_currency) %></:col>
-  <:col :let={{_id, quotes}} label="To"><%= String.upcase(quotes.to_currency) %></:col>
-  <:col :let={{_id, quotes}} label="Rate"><%= quotes.rate %></:col>
   <:action :let={{_id, quotes}}>
     <%= if quotes.status == :active do %>
       <.link patch={~p"/u/#{@user_id}/exchange/#{quotes}"}>
@@ -39,6 +32,18 @@
       </.link>
     <% end %>
   </:action>
+
+  <:col :let={{_id, quotes}} label="From"><%= String.upcase(quotes.from_currency) %></:col>
+  <:col :let={{_id, quotes}} label="Rate"><%= quotes.rate %></:col>
+  <:col :let={{_id, quotes}} label="To"><%= String.upcase(quotes.to_currency) %></:col>
+  <:col :let={{_id, quotes}} label="Expires in">
+    <%= if quotes.status == :active do %>
+      <%= relative_time(quotes.created_at) %>
+    <% else %>
+      <em>expired</em>
+    <% end %>
+  </:col>
+  <:col :let={{_id, quotes}} label="Created At"><%= quotes.created_at %></:col>
 </.table>
 
 <.modal
