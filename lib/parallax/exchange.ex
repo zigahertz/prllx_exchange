@@ -2,6 +2,25 @@ defmodule Parallax.Exchange do
   alias Parallax.{API, Exchange, CacheServer}
   alias Exchange.{User, Quote, Order}
 
+  ## General Methods
+
+  @doc """
+  ensures that GenServer processes are unique i.e. quote and order data corresponding to already-existing GenServer
+  processes received on subsequent API calls are ignored
+  """
+  def lookup_or_create_pid(attrs, server, registry) when is_map(attrs) do
+    with [] <- Registry.lookup(registry, attrs.id),
+        {:ok, pid} <- DynamicSupervisor.start_child(ExchangeSupervisor, {server, via_tuple(registry, attrs)}) do
+      pid
+    else
+      [{pid, _}] -> pid
+      {:error, {{:badmatch, {:error, {:already_started, pid}}}, _}} -> pid
+    end
+  end
+
+  defp via_tuple(registry, attrs) do
+    {:via, Registry, {registry, attrs.id, attrs}}
+  end
   ## User logic
 
   def list_users do
@@ -19,21 +38,20 @@ defmodule Parallax.Exchange do
   end
 
   ## Quote logic
-
-  @quote_expiration_in_seconds 5 * 60
-
-  def fetch_quotes(threshold \\ @quote_expiration_in_seconds) do
-    case Registry.count(ParallaxRegistry) do
-      0 ->
-        API.get_quotes()
-        |> Enum.filter(&quote_filter(&1, threshold))
-        |> Enum.map(&start_quote/1)
-
-      _ ->
-        DynamicSupervisor.which_children(ExchangeSupervisor)
-        |> Enum.filter(fn {_, _, _, [server]} -> server == Quote end)
-        |> Enum.map(fn {_, pid, _, _} -> Quote.show(pid) end)
+  def hydrate_quotes() do
+    if Registry.count(QuoteRegistry) == 0 do
+      API.get_quotes()
+      |> IO.inspect(label: :pipe)
+      |> Enum.map(&start_quote/1)
     end
+  end
+
+  def fetch_quotes() do
+    hydrate_quotes()
+
+    DynamicSupervisor.which_children(ExchangeSupervisor)
+    |> Enum.filter(fn {_, _, _, [server]} -> server == Quote end)
+    |> Enum.map(fn {_, pid, _, _} -> Quote.show(pid) end)
     |> Enum.sort_by(&(&1.created_at), :desc)
   end
 
@@ -42,58 +60,46 @@ defmodule Parallax.Exchange do
   end
 
   def start_quote(attrs) do
-    lookup_or_create_pid(attrs, Quote) |> Quote.show
+    lookup_or_create_pid(attrs, Quote, QuoteRegistry) |> Quote.show
   end
 
-  defp quote_filter(%{created_at: timestamp}, threshold) do
-    datetime_diff(timestamp) <= threshold
-  end
-
-  defp datetime_diff(timestamp) do
-    timestamp
-    |> Timex.parse!("{ISO:Extended}")
-    |> then(&Timex.diff(Timex.now(), &1, :second))
+  def lookup_quote(id) do
+    hydrate_quotes()
+    [{pid, _ }] = Registry.lookup(QuoteRegistry, id)
+    {pid, Quote.show(pid)}
   end
 
   ## Order logic
+
+  def hydrate_orders(user_id) do
+    if Registry.count(OrderRegistry) == 0 do
+      API.get_orders(user_id) |> Enum.map(&start_order/1)
+    end
+  end
+
+  def fetch_orders(user_id) do
+    hydrate_orders(user_id)
+
+    DynamicSupervisor.which_children(ExchangeSupervisor)
+    |> Enum.filter(fn {_, _, _, [server]} -> server == Order end)
+    |> Enum.map(fn {_, pid, _, _} -> Order.show(pid) end)
+  end
 
   def create_order(user_id, quote_id, from_amount) do
     API.create_order(user_id, quote_id, from_amount) |> start_order
   end
 
   def start_order(attrs) do
-    lookup_or_create_pid(attrs, Order) |> Order.show
+    lookup_or_create_pid(attrs, Order, OrderRegistry) |> Order.show
   end
 
-  def fetch_orders(user_id) do
-    case Registry.count(ParallaxRegistry) do
-      0 ->
-        API.get_orders(user_id) |> Enum.map(&start_order/1)
-
-      _ ->
-        DynamicSupervisor.which_children(ExchangeSupervisor)
-        |> Enum.filter(fn {_, _, _, [server]} -> server == Order end)
-        |> Enum.map(fn {_, pid, _, _} -> Order.show(pid) end)
-    end
+  def lookup_order(user_id, id) do
+    hydrate_orders(user_id)
+    [{pid, _}] = Registry.lookup(OrderRegistry, id)
+    {pid, Order.show(pid)}
   end
 
-
-  @doc """
-  ensures that GenServer processes are unique i.e. quote and order data corresponding to already-existing GenServer
-  processes received on subsequent API calls are ignored
-  """
-  def lookup_or_create_pid(attrs, server) when is_map(attrs) do
-    with [] <- Registry.lookup(ParallaxRegistry, attrs.id),
-        {:ok, pid} <- DynamicSupervisor.start_child(ExchangeSupervisor, {server, via_tuple(attrs)}) do
-      pid
-    else
-      [{pid, _}] -> pid
-      {:error, {{:badmatch, {:error, {:already_started, pid}}}, _}} -> pid
-    end
+  def ping_order(id) do
+    API.get_order(id)
   end
-
-  defp via_tuple(attrs) do
-    {:via, Registry, {ParallaxRegistry, attrs.id, attrs}}
-  end
-
 end
