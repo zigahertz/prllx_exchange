@@ -10,7 +10,7 @@ defmodule Parallax.API do
   ]
 
   plug Tesla.Middleware.JSON, engine_opts: [keys: :atoms]
-  # plug Tesla.Middleware.Logger
+  plug Tesla.Middleware.Logger
 
   @doc """
   list user fixtures

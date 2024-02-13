@@ -2,7 +2,7 @@ defmodule Parallax.CacheServer do
   use GenServer
   require Logger
 
-  defstruct ~w(users orders)a
+  defstruct [:users]
 
   ## Client API
   def start_link(_) do
@@ -20,7 +20,7 @@ defmodule Parallax.CacheServer do
   ## Server API
   @impl true
   def init(_opts) do
-    {:ok, struct!(__MODULE__, users: [], orders: [])}
+    {:ok, struct!(__MODULE__, users: [])}
   end
 
   @impl true
