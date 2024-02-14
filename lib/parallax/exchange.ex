@@ -1,5 +1,5 @@
 defmodule Parallax.Exchange do
-  alias Parallax.{API, Exchange, CacheServer}
+  alias Parallax.{API, Exchange, CacheServer, QuoteRegistry, OrderRegistry, ExchangeSupervisor}
   alias Exchange.{User, Quote, Order}
 
   ## General Methods

@@ -19,7 +19,7 @@ defmodule ParallaxWeb.ExchangeLive.FormComponent do
         phx-submit="execute"
       >
         Convert
-        <.input field={@form[:from_amount]} type="number" phx-debounce="100" /> in <%= @from %>
+        <.input field={@form[:from_amount]} type="text" phx-debounce="100" /> in <%= @from %>
         to <%= @amount %> <%= @to %>
 
         <br>
@@ -49,6 +49,7 @@ defmodule ParallaxWeb.ExchangeLive.FormComponent do
 
   @impl true
   def handle_event("calculate", %{"from_amount" => from_amount}, socket) do
+    Float.parse(from_amount) |> dbg()
     case Float.parse(from_amount) do
       :error ->
         {:noreply, put_flash(socket, :info, "amount must be a float")}

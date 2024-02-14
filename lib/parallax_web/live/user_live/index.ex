@@ -1,5 +1,8 @@
 defmodule ParallaxWeb.UserLive.Index do
   use ParallaxWeb, :live_view
+  # alias Task.Supervisor
+  alias Parallax.{Exchange}
+  # alias Parallax.{HydrationSupervisor,Exchange}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -11,5 +14,13 @@ defmodule ParallaxWeb.UserLive.Index do
     {:noreply, assign(socket, :page_title, "Active Users")}
   end
 
-  defp users, do: Parallax.Exchange.list_users()
+  @impl true
+  def handle_event("hydrate", %{"id" => id}, socket) do
+    # Supervisor.async(HydrationSupervisor, fn -> Exchange.hydrate_quotes() end)
+    # Supervisor.async(HydrationSupervisor, fn -> Exchange.hydrate_orders(id) end)
+
+    {:noreply, socket}
+  end
+
+  defp users, do: Exchange.list_users()
 end

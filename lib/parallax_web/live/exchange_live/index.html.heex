@@ -1,6 +1,9 @@
 <.header>
   Quotes
   <:actions>
+    <.link patch={~p"/"}>
+      <.button>Users</.button>
+    </.link>
 
     <.button phx-click={JS.push("create_quote", loading: "#quotes")}>
       Generate Quote
@@ -13,9 +16,6 @@
       <.button>Orders</.button>
     </.link>
 
-    <.link patch={~p"/"}>
-      <.button>Users</.button>
-    </.link>
   </:actions>
 </.header>
 
@@ -36,6 +36,7 @@
   <:col :let={{_id, quotes}} label="From"><%= String.upcase(quotes.from_currency) %></:col>
   <:col :let={{_id, quotes}} label="Rate"><%= quotes.rate %></:col>
   <:col :let={{_id, quotes}} label="To"><%= String.upcase(quotes.to_currency) %></:col>
+  <:col :let={{_id, quotes}} label="Created At"><%= quotes.created_at %></:col>
   <:col :let={{_id, quotes}} label="Expires in">
     <%= if quotes.status == :active do %>
       <%= relative_time(quotes.created_at) %>
@@ -43,7 +44,6 @@
       <em>expired</em>
     <% end %>
   </:col>
-  <:col :let={{_id, quotes}} label="Created At"><%= quotes.created_at %></:col>
 </.table>
 
 <.modal

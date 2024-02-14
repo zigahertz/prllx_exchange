@@ -2,6 +2,10 @@
   Order
   <:actions>
 
+    <.link patch={~p"/"}>
+      <.button>Users</.button>
+    </.link>
+
     <.link patch={~p"/u/#{@user_id}/exchange"}>
       <.button>Quotes</.button>
     </.link>
@@ -10,9 +14,6 @@
       <.button>Orders</.button>
     </.link>
 
-    <.link patch={~p"/"}>
-      <.button>Users</.button>
-    </.link>
   </:actions>
 </.header>
 
