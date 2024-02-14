@@ -40,7 +40,9 @@ defmodule Parallax.Exchange do
   ## Quote logic
   def hydrate_quotes() do
     if Registry.count(QuoteRegistry) == 0 do
-      API.get_quotes() |> Enum.map(&start_quote/1)
+      API.get_quotes()
+      |> Enum.map(&start_quote/1)
+      |> Enum.sort_by(&(&1.created_at), :desc)
     else
       fetch_quotes()
     end
