@@ -5,7 +5,7 @@ Click on a user to exchange currency and see order history.
 <.table
   id="users"
   rows={@streams.users}
-  row_click={fn {id, user} -> JS.push("hydrate", value: %{id: id}) |> JS.navigate(~p"/u/#{user}/exchange") end}
+  row_click={fn {_id, user} -> JS.navigate(~p"/u/#{user}/exchange") end}
 >
   <:col :let={{_id, user}} label="Name"><%= user.name %></:col>
   <:col :let={{_id, user}} label="Email"><%= user.email %></:col>

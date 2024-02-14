@@ -3,10 +3,16 @@ defmodule ParallaxWeb.ExchangeLive.Index do
   alias Parallax.Exchange
 
   @impl true
-  def mount(_, _session, socket) do
+  def mount(%{"id" => _id}, _session, socket) do
     if connected?(socket), do: :timer.send_interval(:timer.seconds(1), self(), :tick)
 
-    {:ok, stream(socket, :quotes, quotes())}
+    {
+      :ok,
+      socket
+      |> stream(:quotes, [])
+      |> assign(:loading, true)
+      |> start_async(:hydrate_quotes, fn -> Exchange.hydrate_quotes() end)
+    }
   end
 
   @impl true
@@ -26,6 +32,7 @@ defmodule ParallaxWeb.ExchangeLive.Index do
     assign(socket, [page_title: "Exchange Currency", user_id: user_id, quote_attrs: attrs, exp: relative_time(attrs.created_at)])
   end
 
+  # instead of refreshing the whole list, creating a component to do countdown timer
   @impl true
   def handle_info(:tick, socket) do
     {:noreply, stream(socket, :quotes, quotes())}
@@ -37,6 +44,16 @@ defmodule ParallaxWeb.ExchangeLive.Index do
       %Exchange.Quote{} = q ->
         {:noreply, stream_insert(socket, :quotes, q, at: 0)}
     end
+  end
+
+  @impl true
+  def handle_async(:hydrate_quotes, {:ok, quotes}, socket) do
+    {
+      :noreply,
+      socket
+      |> stream(:quotes, quotes)
+      |> assign(:loading, false)
+    }
   end
 
   defp quotes, do: Exchange.fetch_quotes()

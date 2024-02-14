@@ -3,14 +3,24 @@ defmodule ParallaxWeb.OrdersLive.Index do
   alias Parallax.Exchange
 
   @impl true
-  def handle_params(%{"id" => id}, _url, socket) do
+  def mount(%{"id" => id}, _session, socket) do
     {
-      :noreply,
+      :ok,
       socket
       |> assign(:user_id, id)
-      |> stream(:orders, orders(id))
+      |> stream(:orders, [])
+      |> assign(:loading, true)
+      |> start_async(:hydrate_orders, fn  -> Exchange.hydrate_orders(id) end)
     }
   end
 
-  defp orders(id), do: Exchange.fetch_orders(id)
+  @impl true
+  def handle_async(:hydrate_orders, {:ok, orders}, socket) do
+    {
+      :noreply,
+      socket
+      |> assign(:loading, false)
+      |> stream(:orders, orders)
+    }
+  end
 end

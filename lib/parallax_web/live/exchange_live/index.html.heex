@@ -19,6 +19,10 @@
   </:actions>
 </.header>
 
+<p :if={@loading}>
+  <.icon name="hero-arrow-path" class="animate-spin h-5 w-5" /> Loading...
+</p>
+
 <.table
   id="quotes"
   rows={@streams.quotes}

@@ -41,12 +41,12 @@ defmodule Parallax.Exchange do
   def hydrate_quotes() do
     if Registry.count(QuoteRegistry) == 0 do
       API.get_quotes() |> Enum.map(&start_quote/1)
+    else
+      fetch_quotes()
     end
   end
 
   def fetch_quotes() do
-    hydrate_quotes()
-
     DynamicSupervisor.which_children(ExchangeSupervisor)
     |> Enum.filter(fn {_, _, _, [server]} -> server == Quote end)
     |> Enum.map(fn {_, pid, _, _} -> Quote.show(pid) end)
@@ -62,7 +62,6 @@ defmodule Parallax.Exchange do
   end
 
   def lookup_quote(id) do
-    hydrate_quotes()
     [{pid, _ }] = Registry.lookup(QuoteRegistry, id)
     {pid, Quote.show(pid)}
   end
@@ -72,12 +71,12 @@ defmodule Parallax.Exchange do
   def hydrate_orders(user_id) do
     if Registry.count(OrderRegistry) == 0 do
       API.get_orders(user_id) |> Enum.map(&start_order/1)
+    else
+      fetch_orders(user_id)
     end
   end
 
-  def fetch_orders(user_id) do
-    hydrate_orders(user_id)
-
+  def fetch_orders(_user_id) do
     DynamicSupervisor.which_children(ExchangeSupervisor)
     |> Enum.filter(fn {_, _, _, [server]} -> server == Order end)
     |> Enum.map(fn {_, pid, _, _} -> Order.show(pid) end)
@@ -91,8 +90,7 @@ defmodule Parallax.Exchange do
     lookup_or_create_pid(attrs, Order, OrderRegistry) |> Order.show
   end
 
-  def lookup_order(user_id, id) do
-    hydrate_orders(user_id)
+  def lookup_order(_user_id, id) do
     [{pid, _}] = Registry.lookup(OrderRegistry, id)
     {pid, Order.show(pid)}
   end

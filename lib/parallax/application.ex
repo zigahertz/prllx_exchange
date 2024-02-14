@@ -14,7 +14,6 @@ defmodule Parallax.Application do
       {Phoenix.PubSub, name: Parallax.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Parallax.Finch},
-      # {Task.Supervisor, name: Parallax.HydrationSupervisor},
       {Registry, keys: :unique, name: Parallax.QuoteRegistry},
       {Registry, keys: :unique, name: Parallax.OrderRegistry},
       {DynamicSupervisor, name: Parallax.ExchangeSupervisor},
